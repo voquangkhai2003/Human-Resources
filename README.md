@@ -19,7 +19,7 @@ The project is built on **5 related tables:**
 | `dbo.Stores` | `stores.sql` | 150 retail stores — name, city, type, opening date |
 | `dbo.EmployeePerformance` | `employee_performance.sql` | Employee profiles — age, education, salary, job level, manager |
 | `dbo.MonthlyPerformance` | `monthly_performance.sql` | Monthly records — rating, training hours, overtime, bonus, satisfaction |
-| `dbo.RoleKPIs` | `role_kpis.sql` + `role_kpis_data_02.sql` | Role-specific KPIs + Productivity Index (split into 2 files due to size) |
+| `dbo.RoleKPIs` | `role_kpis.sql` + `role_kpis_02.sql` | Role-specific KPIs + Productivity Index (split into 2 files due to size) |
 | `dbo.BusinessOutcomes` | `business_outcomes.sql` | Store-level revenue, CSAT, NPS, waste %, on-time delivery |
 
 **Relationships:**
