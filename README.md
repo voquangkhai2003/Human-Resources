@@ -164,8 +164,6 @@ SELECT ... FROM tenured
 
 ## 👤 Author
 
-**[Tên của bạn]**
-Data Analyst
-
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue)](https://linkedin.com)
-[![Email](https://img.shields.io/badge/Email-Contact-red)](mailto:your@email.com)
+**Vo Quang Khai**
+Data Analyst | Finance & Data Science Background
+[LinkedIn](https://www.linkedin.com/in/voquangkhaikg2003/) · [GitHub](https://github.com/voquangkhai2003)
