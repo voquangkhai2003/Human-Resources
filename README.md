@@ -98,7 +98,7 @@ hr-analytics/
 ├── employee_performance.sql       ← DDL + INSERT data (7,500 employees)
 ├── monthly_performance.sql        ← DDL + INSERT data (236,591 records)
 ├── role_kpis.sql                  ← DDL + INSERT rows 1 – 100,000
-├── role_kpis_data_02.sql          ← INSERT rows 100,001 – 236,591 (split due to size)
+├── role_kpis_02.sql               ← INSERT rows 100,001 – 236,591 (split due to size)
 ├── business_outcomes.sql          ← DDL + INSERT data (16,200 records)
 │
 ├── Querry_Human_Resources.sql     ← All 22 analysis queries
