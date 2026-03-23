@@ -140,28 +140,6 @@ Chart.js                ← Visualizations (bar, line, radar, scatter, doughnut)
 
 ---
 
-## 📝 MSSQL Best Practices áp dụng
-
-```sql
--- ✅ TOP N thay vì LIMIT
-SELECT TOP 10 ...
-
--- ✅ TRY_CONVERT cho date parsing an toàn
-TRY_CONVERT(DATE, Hire_Date, 103)
-
--- ✅ DATEDIFF cho date arithmetic
-DATEDIFF(MONTH, hire_dt, exit_dt)
-
--- ✅ Lặp lại CASE expression trong GROUP BY (không dùng alias)
-GROUP BY CASE WHEN ... END
-
--- ✅ CTE để tránh subquery lồng nhau
-WITH parsed AS (...), tenured AS (...)
-SELECT ... FROM tenured
-```
-
----
-
 ## 👤 Author
 
 **Vo Quang Khai**
