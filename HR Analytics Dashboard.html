@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workforce Intelligence — HR Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --cream:#f5f1eb; --cream2:#ede9e1; --cream3:#e4dfd6;
+  --ink:#1a1714; --ink2:#2d2926; --ink3:#4a4540;
+  --navy:#1c2e4a; --navy2:#243756; --navy3:#2e4368;
+  --gold:#b8963e; --gold2:#d4aa52; --gold3:#e8c878;
+  --red:#9b2335; --red2:#b52a3d;
+  --muted:#8a8278; --rule:#c8c2b8;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'IBM Plex Sans',sans-serif;
+  background:var(--cream);color:var(--ink);
+  display:flex;flex-direction:column;
+}
+
+/* ── MASTHEAD ── */
+.masthead{
+  background:var(--navy);color:var(--cream);
+  padding:0 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  height:52px;flex-shrink:0;
+  border-bottom:3px solid var(--gold);
+}
+.masthead-left{display:flex;align-items:baseline;gap:1.2rem}
+.masthead-title{
+  font-family:'Playfair Display',serif;
+  font-size:1.15rem;font-weight:900;
+  letter-spacing:0.02em;color:var(--cream);
+}
+.masthead-rule{color:var(--gold);font-size:1rem;opacity:0.7}
+.masthead-sub{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.62rem;color:rgba(245,241,235,0.5);
+  letter-spacing:0.12em;text-transform:uppercase;
+}
+.masthead-right{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.6rem;color:rgba(245,241,235,0.45);
+  letter-spacing:0.1em;text-align:right;
+}
+
+/* ── NAV BAR ── */
+.navbar{
+  background:var(--cream2);
+  border-bottom:1px solid var(--rule);
+  display:flex;align-items:stretch;
+  height:38px;flex-shrink:0;
+  padding:0 2rem;gap:0;
+}
+.nav-tab{
+  display:flex;align-items:center;gap:0.45rem;
+  padding:0 1.1rem;border:none;background:none;
+  font-family:'IBM Plex Sans',sans-serif;font-size:0.75rem;font-weight:500;
+  color:var(--muted);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:all 0.15s;white-space:nowrap;
+  letter-spacing:0.01em;
+}
+.nav-tab:hover{color:var(--ink);background:rgba(0,0,0,0.03)}
+.nav-tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:600}
+.nav-icon{font-size:0.8rem;opacity:0.7}
+
+/* ── CONTENT ── */
+.pages{flex:1;overflow:hidden;position:relative}
+.page{
+  position:absolute;inset:0;overflow-y:auto;
+  display:none;
+  scrollbar-width:thin;scrollbar-color:var(--rule) transparent;
+}
+.page.active{display:block}
+.page::-webkit-scrollbar{width:5px}
+.page::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px}
+
+/* ── PAGE LAYOUT ── */
+.pg{padding:1.5rem 2rem 2.5rem;max-width:1440px;margin:0 auto}
+
+/* ── SECTION HEADER ── */
+.section-hed{
+  display:flex;align-items:baseline;gap:0.75rem;
+  margin-bottom:1rem;padding-bottom:0.5rem;
+  border-bottom:2px solid var(--ink);
+}
+.section-hed h2{
+  font-family:'Playfair Display',serif;
+  font-size:1rem;font-weight:700;
+  color:var(--ink);letter-spacing:0.01em;
+}
+.section-hed .hed-rule{flex:1;height:1px;background:var(--rule);margin:0 0.5rem;align-self:center}
+.section-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.58rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:0.12em;
+}
+
+/* ── KPI ROW ── */
+.kpi-row{
+  display:grid;gap:0;
+  margin-bottom:1.2rem;
+  border:1px solid var(--rule);
+  background:white;
+}
+.kpi-row.k4{grid-template-columns:repeat(4,1fr)}
+.kpi-row.k3{grid-template-columns:repeat(3,1fr)}
+.kpi-row.k2{grid-template-columns:repeat(2,1fr)}
+.kpi-cell{
+  padding:1rem 1.2rem;
+  border-right:1px solid var(--rule);
+  position:relative;
+}
+.kpi-cell:last-child{border-right:none}
+.kpi-cell::before{
+  content:'';position:absolute;top:0;left:0;right:0;
+  height:3px;background:var(--accent,var(--navy));
+}
+.kpi-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.58rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:0.1em;
+  margin-bottom:0.35rem;
+}
+.kpi-value{
+  font-family:'Playfair Display',serif;
+  font-size:2rem;font-weight:900;
+  line-height:1;letter-spacing:-0.02em;
+  color:var(--navy);
+}
+.kpi-sub{
+  font-family:'IBM Plex Sans',sans-serif;
+  font-size:0.68rem;color:var(--muted);
+  margin-top:0.25rem;
+}
+.kpi-change{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.6rem;margin-top:0.3rem;
+  display:inline-block;padding:0.1rem 0.3rem;
+}
+.ch-up{background:#d4edda;color:#155724}
+.ch-dn{background:#f8d7da;color:#721c24}
+.ch-nu{background:#d1ecf1;color:#0c5460}
+
+/* ── GRID ── */
+.grid{display:grid;gap:1rem;margin-bottom:1rem}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1fr 1fr 1fr}
+.g13{grid-template-columns:1fr 2.5fr}
+.g31{grid-template-columns:2.5fr 1fr}
+.g21{grid-template-columns:2fr 1fr}
+.g12{grid-template-columns:1fr 2fr}
+@media(max-width:1100px){.g2,.g3,.g13,.g31,.g21,.g12{grid-template-columns:1fr 1fr}}
+
+/* ── PANEL ── */
+.panel{
+  background:white;border:1px solid var(--rule);
+  padding:1rem 1.1rem;
+}
+.panel-hed{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  margin-bottom:0.8rem;padding-bottom:0.6rem;
+  border-bottom:1px solid var(--cream3);
+}
+.panel-title{
+  font-family:'IBM Plex Sans',sans-serif;
+  font-size:0.78rem;font-weight:600;color:var(--ink2);
+  letter-spacing:0.01em;
+}
+.panel-sub{font-size:0.65rem;color:var(--muted);margin-top:2px}
+.panel-meta{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.58rem;color:var(--muted);
+  padding:0.1rem 0.4rem;background:var(--cream2);
+  border:1px solid var(--rule);white-space:nowrap;
+}
+
+/* ── ACCENT PANEL ── */
+.panel.accent-l{border-left:3px solid var(--navy)}
+.panel.accent-gold{border-left:3px solid var(--gold)}
+.panel.accent-red{border-left:3px solid var(--red)}
+
+/* ── CHART ── */
+.ch{position:relative}
+
+/* ── TABLE ── */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.76rem}
+thead tr{background:var(--navy)}
+th{
+  font-family:'IBM Plex Mono',monospace;font-size:0.58rem;
+  color:rgba(245,241,235,0.8);text-transform:uppercase;
+  letter-spacing:0.08em;padding:0.45rem 0.7rem;text-align:left;
+  white-space:nowrap;font-weight:400;
+}
+td{
+  padding:0.45rem 0.7rem;
+  border-bottom:1px solid var(--cream3);
+  font-size:0.75rem;color:var(--ink3);
+  vertical-align:middle;
+}
+tbody tr:hover td{background:var(--cream2)}
+tbody tr:last-child td{border-bottom:none}
+.mono{font-family:'IBM Plex Mono',monospace;font-size:0.72rem}
+.td-bold{font-weight:600;color:var(--ink)}
+
+/* ── BADGE ── */
+.bdg{
+  display:inline-block;font-family:'IBM Plex Mono',monospace;
+  font-size:0.58rem;padding:0.08rem 0.35rem;
+  border:1px solid;white-space:nowrap;
+}
+.bdg-navy{color:var(--navy);border-color:var(--navy3);background:rgba(28,46,74,0.06)}
+.bdg-gold{color:#7a5e1a;border-color:var(--gold);background:rgba(184,150,62,0.1)}
+.bdg-red{color:var(--red);border-color:var(--red2);background:rgba(155,35,53,0.07)}
+.bdg-green{color:#1a5c2a;border-color:#2d8a44;background:rgba(45,138,68,0.08)}
+
+/* ── INLINE STAT ── */
+.inline-stats{display:flex;gap:1.5rem;margin:0.75rem 0}
+.is-item{border-left:2px solid var(--navy);padding-left:0.65rem}
+.is-val{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:var(--navy);line-height:1}
+.is-lbl{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:2px}
+
+/* ── MINI BAR ── */
+.mbar{display:flex;align-items:center;gap:6px}
+.mbar-bg{flex:1;height:3px;background:var(--cream3)}
+.mbar-fill{height:100%;background:var(--navy)}
+.mbar-val{font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:var(--muted);min-width:28px;text-align:right}
+
+/* ── RISK INDICATOR ── */
+.risk-dot{
+  display:inline-block;width:8px;height:8px;
+  border-radius:50%;flex-shrink:0;
+}
+.r-hi{background:var(--red)} .r-md{background:var(--gold)} .r-lo{background:#2d8a44}
+
+/* ── INSIGHT BOX ── */
+.insight{
+  background:var(--cream2);border-left:3px solid var(--navy);
+  padding:0.6rem 0.8rem;margin-top:0.7rem;
+  font-size:0.72rem;color:var(--ink3);line-height:1.55;
+}
+.insight strong{color:var(--ink);font-weight:600}
+
+/* ── DIVIDER ── */
+.rule{height:1px;background:var(--rule);margin:1.2rem 0}
+
+/* ── RANK NUMBER ── */
+.rn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;
+  font-family:'IBM Plex Mono',monospace;font-size:0.6rem;
+  background:var(--navy);color:var(--cream);
+  font-weight:500;
+}
+.rn.g1{background:var(--gold);color:var(--ink)}
+.rn.g2{background:var(--cream3);color:var(--ink3)}
+.rn.g3{background:#c8a96e50;color:var(--ink3)}
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<div class="masthead">
+  <div class="masthead-left">
+    <div class="masthead-title">Workforce Intelligence</div>
+    <div class="masthead-rule">|</div>
+    <div class="masthead-sub">HR Analytics · 2022–2024</div>
+  </div>
+  <div class="masthead-right">
+    7,500 EMPLOYEES &nbsp;·&nbsp; 150 STORES &nbsp;·&nbsp; 9 DEPARTMENTS<br>
+    <span style="opacity:0.35">MICROSOFT SQL SERVER</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="navbar">
+  <button class="nav-tab active" onclick="go('overview',this)"><span class="nav-icon">◈</span>Overview</button>
+  <button class="nav-tab" onclick="go('people',this)"><span class="nav-icon">◉</span>People & Retention</button>
+  <button class="nav-tab" onclick="go('performance',this)"><span class="nav-icon">◈</span>Performance</button>
+  <button class="nav-tab" onclick="go('compensation',this)"><span class="nav-icon">◉</span>Compensation</button>
+  <button class="nav-tab" onclick="go('talent',this)"><span class="nav-icon">◈</span>Talent Management</button>
+  <button class="nav-tab" onclick="go('stores',this)"><span class="nav-icon">◉</span>Store Operations</button>
+</div>
+
+<div class="pages">
+
+<!-- ══ OVERVIEW ══ -->
+<div class="page active" id="page-overview">
+<div class="pg">
+
+  <div class="kpi-row k4">
+    <div class="kpi-cell" style="--accent:var(--navy)">
+      <div class="kpi-label">Total Employees</div>
+      <div class="kpi-value">7,500</div>
+      <div class="kpi-sub">Across 9 departments · 150 stores</div>
+    </div>
+    <div class="kpi-cell" style="--accent:var(--red)">
+      <div class="kpi-label">Attrition Rate</div>
+      <div class="kpi-value" style="color:var(--red)">19.9%</div>
+      <div class="kpi-sub">1,491 employees exited</div>
+      <div class="kpi-change ch-dn">Logistics & HR highest at 22.2%</div>
+    </div>
+    <div class="kpi-cell" style="--accent:var(--gold)">
+      <div class="kpi-label">Avg Performance</div>
+      <div class="kpi-value" style="color:var(--gold)">3.73</div>
+      <div class="kpi-sub">Out of 5.0 · All departments</div>
+      <div class="kpi-change ch-up">Peak: Dec 2024 → 3.908</div>
+    </div>
+    <div class="kpi-cell" style="--accent:#2d8a44">
+      <div class="kpi-label">Avg Satisfaction</div>
+      <div class="kpi-value" style="color:#2d8a44">7.23</div>
+      <div class="kpi-sub">Out of 10.0 · Engagement 7.21</div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel accent-l">
+      <div class="panel-hed">
+        <div><div class="panel-title">Attrition Rate by Department</div><div class="panel-sub">Percentage of headcount that exited</div></div>
+      </div>
+      <div class="ch" style="height:230px"><canvas id="ov_att"></canvas></div>
+    </div>
+    <div class="panel accent-l">
+      <div class="panel-hed">
+        <div><div class="panel-title">Monthly Performance Trend</div><div class="panel-sub">Top 12 months by average rating</div></div>
+      </div>
+      <div class="ch" style="height:230px"><canvas id="ov_trend"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid" style="grid-template-columns:1.1fr 1.4fr 1fr">
+    <div class="panel">
+      <div class="panel-hed"><div><div class="panel-title">Headcount by Department</div></div></div>
+      <div class="ch" style="height:200px"><canvas id="ov_hc"></canvas></div>
+    </div>
+    <div class="panel accent-gold">
+      <div class="panel-hed"><div><div class="panel-title">Salary Range by Job Level</div><div class="panel-sub">Average annual base salary · USD</div></div></div>
+      <div class="ch" style="height:200px"><canvas id="ov_sal"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-hed"><div><div class="panel-title">Satisfaction by Department</div><div class="panel-sub">Score out of 10.0</div></div></div>
+      <div id="ov_sat_list" style="margin-top:0.3rem"></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══ PEOPLE ══ -->
+<div class="page" id="page-people">
+<div class="pg">
+
+  <div class="kpi-row k4">
+    <div class="kpi-cell" style="--accent:var(--red)">
+      <div class="kpi-label">Total Exits</div>
+      <div class="kpi-value" style="color:var(--red)">1,491</div>
+      <div class="kpi-sub">19.9% of total workforce</div>
+    </div>
+    <div class="kpi-cell" style="--accent:var(--gold)">
+      <div class="kpi-label">Late Attrition</div>
+      <div class="kpi-value" style="color:var(--gold)">37%</div>
+      <div class="kpi-sub">Left after 3+ years of service</div>
+      <div class="kpi-change ch-dn">High-experience loss</div>
+    </div>
+    <div class="kpi-cell" style="--accent:#2d8a44">
+      <div class="kpi-label">Best Retention</div>
+      <div class="kpi-value" style="color:#2d8a44">86%</div>
+      <div class="kpi-sub">2012–2013 hire cohort</div>
+    </div>
+    <div class="kpi-cell" style="--accent:var(--navy)">
+      <div class="kpi-label">Flight Risk Flagged</div>
+      <div class="kpi-value">15</div>
+      <div class="kpi-sub">Active employees · Score &gt; 3.74</div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel accent-red">
+      <div class="panel-hed"><div><div class="panel-title">Attrition Rate by Department</div><div class="panel-sub">% of headcount that exited</div></div></div>
+      <div class="ch" style="height:230px"><canvas id="p_att"></canvas></div>
+      <div class="insight"><strong>Logistics/Warehousing & HR</strong> lead at 22.2% — 2.3 points above the company average. Priority departments for retention intervention programs.</div>
+    </div>
+    <div class="panel">
+      <div class="panel-hed"><div><div class="panel-title">When Do Employees Leave?</div><div class="panel-sub">Exit volume by tenure length at time of departure</div></div></div>
+      <div class="ch" style="height:230px"><canvas id="p_ten"></canvas></div>
+      <div class="insight"><strong>37% leave after 3+ years</strong>, not during onboarding. The critical window is <strong>12–36 months</strong> (46% of all exits). Retention programs should focus here.</div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel">
+      <div class="panel-hed"><div><div class="panel-title">Cohort Retention by Hire Year</div><div class="panel-sub">% of each cohort still active today</div></div></div>
+      <div class="ch" style="height:200px"><canvas id="p_coh"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-hed"><div><div class="panel-title">Attrition by Employment Type</div><div class="panel-sub">Full-time vs Part-time vs Contractor vs Seasonal</div></div></div>
+      <div class="ch" style="height:200px"><canvas id="p_et"></canvas></div>
+      <div class="insight"><strong>Contractor attrition at 42.8%</strong> is the real concern — trained contractors represent significant skill loss. Seasonal at 56.5% reflects the nature of the role.</div>
+    </div>
+  </div>
+
+  <div class="panel accent-red">
+    <div class="panel-hed"><div><div class="panel-title">Flight Risk — Top 15 At-Risk Employees</div><div class="panel-sub">Score = Absenteeism×0.3 + (10−Satisfaction)×0.4 + (5−Performance)×0.3 · Active staff only</div></div></div>
+    <div class="tw"><table><thead><tr><th>#</th><th>Name</th><th>Department</th><th>Role</th><th>Absent Days</th><th>Satisfaction</th><th>Performance</th><th>Risk Score</th></tr></thead><tbody id="p_risk"></tbody></table></div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══ PERFORMANCE ══ -->
+<div class="page" id="page-performance">
+<div class="pg">
+
+  <div class="kpi-row k4">
+    <div class="kpi-cell" style="--accent:#2d8a44">
+      <div class="kpi-label">Peak Rating</div>
+      <div class="kpi-value" style="color:#2d8a44">3.908</div>
+      <div class="kpi-sub">December 2024 — highest month</div>
+    </div>
+    <div class="kpi-cell" style="--accent:var(--navy)">
+      <div class="kpi-label">Optimal Training</div>
+      <div class="kpi-value">5–9h</div>
+      <div class="kpi-sub">Per month · Best performance range</div>
+    </div>
+    <div class="kpi-cell" style="--accent:var(--red)">
+      <div class="kpi-label">Absenteeism Alert</div>
+      <div class="kpi-value" style="color:var(--red)">4–5d</div>
+      <div class="kpi-sub">Per month · Red alert threshold</div>
+    </div>
+    <div class="kpi-cell" style="--accent:var(--gold)">
+      <div class="kpi-label">Age vs Perf Gap</div>
+      <div class="kpi-value" style="color:var(--gold)">0.09</div>
+      <div class="kpi-sub">Max difference across all age groups</div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel accent-l">
+      <div class="panel-hed"><div><div class="panel-title">Monthly Performance — Top 12 Periods</div><div class="panel-sub">Average rating across all employees</div></div></div>
+      <div class="ch" style="height:220px"><canvas id="pf_mo"></canvas></div>
+      <div class="insight"><strong>Nov–Dec and Jan</strong> consistently outperform other months — a year-end review and new-year momentum effect. Align incentive cycles to sustain this pattern.</div>
+    </div>
+    <div class="panel">
+      <div class="panel-hed"><div><div class="panel-title">Training Hours vs Outcomes</div><div class="panel-sub">Performance rating and satisfaction by monthly training volume</div></div></div>
+      <div class="ch" style="height:220px"><canvas id="pf_tr"></canvas></div>
+      <div class="insight"><strong>5–9h/month is the sweet spot</strong> — performance 3.939, satisfaction 7.529. Beyond 15h shows diminishing returns: "training overload effect."</div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel accent-red">
+      <div class="panel-hed"><div><div class="panel-title">Absenteeism → Performance Decline</div><div class="panel-sub">Average rating drops as absent days per month increase</div></div></div>
+      <div class="ch" style="height:200px"><canvas id="pf_ab"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-hed"><div><div class="panel-title">Performance & Satisfaction by Age Group</div><div class="panel-sub">Does age determine output?</div></div></div>
+      <div class="ch" style="height:200px"><canvas id="pf_ag"></canvas></div>
+      <div class="insight">A gap of just <strong>0.09 points</strong> across all age groups. Age is not a meaningful performance predictor — focus investment on environment, management quality, and training.</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══ COMPENSATION ══ -->
+<div class="page" id="page-compensation">
+<div class="pg">
+
+  <div class="kpi-row k4">
+    <div class="kpi-cell" style="--accent:var(--navy)">
+      <div class="kpi-label">Executive Avg Salary</div>
+      <div class="kpi-value">$111K</div>
+      <div class="kpi-sub">Annual base · Top level</div>
+    </div>
+    <div class="kpi-cell" style="--accent:var(--gold)">
+      <div class="kpi-label">Entry Avg Salary</div>
+      <div class="kpi-value" style="color:var(--gold)">$23K</div>
+      <div class="kpi-sub">Annual base · Entry level</div>
+    </div>
+    <div class="kpi-cell" style="--accent:var(--navy)">
+      <div class="kpi-label">Pay Gap Ratio</div>
+      <div class="kpi-value">4.8×</div>
+      <div class="kpi-sub">Entry to Executive</div>
+    </div>
+    <div class="kpi-cell" style="--accent:var(--red)">
+      <div class="kpi-label">Underpaid High Performers</div>
+      <div class="kpi-value" style="color:var(--red)">15</div>
+      <div class="kpi-sub">Perf ≥ 4.2 · Below level average pay</div>
+      <div class="kpi-change ch-dn">Critical retention risk</div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel accent-gold">
+      <div class="panel-hed"><div><div class="panel-title">Average Salary by Job Level</div><div class="panel-sub">Annual base salary · USD</div></div></div>
+      <div class="ch" style="height:230px"><canvas id="c_sl"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-hed"><div><div class="panel-title">Average Salary by Department</div><div class="panel-sub">Annual base salary · USD</div></div></div>
+      <div class="ch" style="height:230px"><canvas id="c_sd"></canvas></div>
+      <div class="insight">The department salary range is narrow — only an <strong>8.9% gap</strong> from highest to lowest. Job level is a far stronger predictor of pay than department assignment.</div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel">
+      <div class="panel-hed"><div><div class="panel-title">Overtime Hours by Department</div><div class="panel-sub">Avg hours/month with performance overlay</div></div></div>
+      <div class="ch" style="height:210px"><canvas id="c_ot"></canvas></div>
+      <div class="insight"><strong>IT works the most overtime</strong> (8.33h/mo) but has the lowest performance score. Store Operations is high overtime yet leads in satisfaction — culture outweighs hours worked.</div>
+    </div>
+    <div class="panel accent-red">
+      <div class="panel-hed"><div><div class="panel-title">Underpaid High Performers — Salary Deficit</div><div class="panel-sub">Performance ≥ 4.2 · Earning below job level average</div></div></div>
+      <div class="ch" style="height:210px"><canvas id="c_gp"></canvas></div>
+      <div class="insight">These employees are the <strong>highest poaching risk</strong> in the organization. Salary correction cost is a fraction of the cost to recruit and train their replacements.</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══ TALENT ══ -->
+<div class="page" id="page-talent">
+<div class="pg">
+
+  <div class="kpi-row k4">
+    <div class="kpi-cell" style="--accent:var(--gold)">
+      <div class="kpi-label">Top Manager Score</div>
+      <div class="kpi-value" style="color:var(--gold)">3.802</div>
+      <div class="kpi-sub">Nicholas Fitzgerald · Team of 138</div>
+    </div>
+    <div class="kpi-cell" style="--accent:#2d8a44">
+      <div class="kpi-label">Promotion Performance Uplift</div>
+      <div class="kpi-value" style="color:#2d8a44">+14.5%</div>
+      <div class="kpi-sub">Promoted vs non-promoted avg</div>
+    </div>
+    <div class="kpi-cell" style="--accent:var(--navy)">
+      <div class="kpi-label">Education Leader</div>
+      <div class="kpi-value" style="font-size:1.5rem">Master's</div>
+      <div class="kpi-sub">Highest performance and promotion rate</div>
+    </div>
+    <div class="kpi-cell" style="--accent:var(--navy)">
+      <div class="kpi-label">Top Promotion Candidate</div>
+      <div class="kpi-value" style="font-size:1.4rem">3.579</div>
+      <div class="kpi-sub">Anna Wheeler · Store Operations</div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel accent-gold">
+      <div class="panel-hed"><div><div class="panel-title">Top 10 Managers by Team Performance</div><div class="panel-sub">Average monthly performance rating of all direct reports</div></div></div>
+      <div class="ch" style="height:255px"><canvas id="t_mgr"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-hed"><div><div class="panel-title">Promoted vs Not Promoted — Four Dimensions</div><div class="panel-sub">Comparing performance, productivity, satisfaction, and training hours</div></div></div>
+      <div class="ch" style="height:255px"><canvas id="t_radar"></canvas></div>
+      <div class="insight">Promoted employees outperform peers by <strong>+14.5% on performance</strong> and <strong>+20.2% on productivity</strong>. The evaluation system correctly identifies top talent.</div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel">
+      <div class="panel-hed"><div><div class="panel-title">Education Level vs Performance and Promotion Rate</div><div class="panel-sub">Does higher education translate to better outcomes in retail?</div></div></div>
+      <div class="ch" style="height:200px"><canvas id="t_edu"></canvas></div>
+      <div class="insight"><strong>PhD ranks 3rd despite the highest academic credential</strong> — research skills are underutilized in retail operations. Master's delivers the strongest return on education investment.</div>
+    </div>
+    <div class="panel accent-l">
+      <div class="panel-hed"><div><div class="panel-title">Top 15 Promotion Candidates</div><div class="panel-sub">Weighted score: Performance×0.4 + Productivity×0.5 + Satisfaction×0.1</div></div></div>
+      <div class="tw" style="max-height:240px;overflow-y:auto"><table><thead><tr><th>#</th><th>Name</th><th>Department</th><th>Level</th><th>Score</th></tr></thead><tbody id="t_cand"></tbody></table></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══ STORES ══ -->
+<div class="page" id="page-stores">
+<div class="pg">
+
+  <div class="kpi-row k4">
+    <div class="kpi-cell" style="--accent:#2d8a44">
+      <div class="kpi-label">Top Store Revenue</div>
+      <div class="kpi-value" style="color:#2d8a44">$24.3M</div>
+      <div class="kpi-sub">NY Superstore #81 · 2022–2024</div>
+    </div>
+    <div class="kpi-cell" style="--accent:var(--red)">
+      <div class="kpi-label">Bottom Store Revenue</div>
+      <div class="kpi-value" style="color:var(--red)">$5.9M</div>
+      <div class="kpi-sub">Express format locations</div>
+    </div>
+    <div class="kpi-cell" style="--accent:var(--navy)">
+      <div class="kpi-label">Avg Customer Satisfaction</div>
+      <div class="kpi-value">7.51</div>
+      <div class="kpi-sub">Consistent across all store types</div>
+    </div>
+    <div class="kpi-cell" style="--accent:var(--gold)">
+      <div class="kpi-label">Low vs High Waste Revenue</div>
+      <div class="kpi-value" style="color:var(--gold)">4.5×</div>
+      <div class="kpi-sub">Stores with &lt;1.5% waste earn far more</div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel accent-l">
+      <div class="panel-hed"><div><div class="panel-title">Top 5 vs Bottom 5 Stores by Revenue</div><div class="panel-sub">Total revenue over the 2022–2024 period</div></div></div>
+      <div class="ch" style="height:240px"><canvas id="s_rev"></canvas></div>
+      <div class="insight"><strong>Store format and city size</strong> explain the $18M revenue gap — not CSAT or NPS, which are nearly identical between the top and bottom stores.</div>
+    </div>
+    <div class="panel">
+      <div class="panel-hed"><div><div class="panel-title">On-Time Delivery vs Customer Satisfaction</div><div class="panel-sub">Does faster delivery produce happier customers?</div></div></div>
+      <div class="ch" style="height:240px"><canvas id="s_otd"></canvas></div>
+      <div class="insight"><strong>Counterintuitive finding:</strong> lower OTD correlates with higher CSAT. When deliveries are late, staff compensate with better personal service. Human experience beats logistics speed.</div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel accent-red">
+      <div class="panel-hed"><div><div class="panel-title">Waste Percentage → Monthly Revenue per Store</div><div class="panel-sub">Operational efficiency and its impact on revenue</div></div></div>
+      <div class="ch" style="height:200px"><canvas id="s_wst"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-hed"><div><div class="panel-title">Employee Satisfaction → Store Revenue</div><div class="panel-sub">Top 20 stores: staff satisfaction score vs total revenue</div></div></div>
+      <div style="display:flex;gap:1.2rem;margin-bottom:0.5rem">
+        <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.68rem;color:var(--muted)"><div style="width:10px;height:10px;background:var(--navy);border-radius:50%"></div>Regular</div>
+        <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.68rem;color:var(--muted)"><div style="width:10px;height:10px;background:var(--gold);border-radius:50%"></div>Superstore</div>
+      </div>
+      <div class="ch" style="height:175px"><canvas id="s_sct"></canvas></div>
+      <div class="insight">Stores with satisfied employees <strong>rarely appear in the low revenue tier</strong>. A positive correlation worth sustaining through investment in workplace culture.</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+</div><!-- /pages -->
+
+<script>
+const NA='#1c2e4a',GO='#b8963e',RD='#9b2335',GN='#2d8a44',MU='#8a8278';
+const NA2='rgba(28,46,74,0.7)',GO2='rgba(184,150,62,0.7)',RD2='rgba(155,35,53,0.7)',GN2='rgba(45,138,68,0.7)';
+const NA4='rgba(28,46,74,0.4)',GO4='rgba(184,150,62,0.4)',NA6='rgba(28,46,74,0.6)';
+const GR='rgba(0,0,0,0.04)';
+
+Chart.defaults.color=MU;
+Chart.defaults.font.family="'IBM Plex Sans'";
+Chart.defaults.font.size=11;
+
+function tp(e={}){return{backgroundColor:'#fff',borderColor:'#c8c2b8',borderWidth:1,titleFont:{family:"'IBM Plex Mono'",size:10},titleColor:'#1a1714',bodyColor:'#4a4540',bodyFont:{family:"'IBM Plex Sans'",size:11},padding:8,boxPadding:4,...e};}
+function sc(e={}){return{x:{grid:{color:GR,drawBorder:false}},y:{grid:{color:GR,drawBorder:false}},...e};}
+function base(e={}){return{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tp()},scales:sc(),...e};}
+
+const D={
+  depts:["Store Ops","Logistics","Fresh Produce","M/F Bakery","IT","Finance","HR","Marketing","Cust. Svc"],
+  att:[18.9,22.2,20.4,18.9,17.8,18.7,22.2,20.7,18.7],
+  hc:[3000,1500,1125,900,225,225,225,150,150],
+  sat:[7.323,7.12,7.206,7.201,7.218,7.216,7.251,7.199,7.247],
+  monthly:[{m:"Dec 2024",r:3.908},{m:"Dec 2023",r:3.893},{m:"Nov 2024",r:3.836},{m:"Jan 2024",r:3.834},{m:"Dec 2022",r:3.826},{m:"Nov 2023",r:3.818},{m:"Feb 2024",r:3.798},{m:"Jan 2023",r:3.778},{m:"Mar 2024",r:3.777},{m:"Apr 2024",r:3.759},{m:"May 2024",r:3.749},{m:"Feb 2023",r:3.749}],
+  salLvl:[{l:"Executive",s:111146},{l:"Sr. Manager",s:92330},{l:"Manager",s:65360},{l:"Supervisor",s:42332},{l:"Sr. Associate",s:36395},{l:"Associate",s:29013},{l:"Entry",s:23052}],
+  salDept:[{d:"IT",s:28560},{d:"Finance",s:28056},{d:"Logistics",s:27575},{d:"Store Ops",s:27404},{d:"Fresh Prod.",s:26916},{d:"Marketing",s:26797},{d:"HR",s:26540},{d:"M/F Bakery",s:26536},{d:"Cust. Svc",s:26244}],
+  training:[{b:"0-4h",p:3.651,s:7.177},{b:"5-9h",p:3.939,s:7.529},{b:"10-14h",p:3.804,s:7.346},{b:"15-19h",p:3.724,s:7.112},{b:"20h+",p:3.741,s:7.393}],
+  absent:[{b:"0 days",p:3.761},{b:"1 day",p:3.68},{b:"2-3 days",p:3.573},{b:"4-5 days",p:3.434},{b:"6+ days",p:3.337}],
+  age:[{g:"<25",p:3.689,s:7.225},{g:"25-29",p:3.701,s:7.226},{g:"30-34",p:3.696,s:7.235},{g:"35-39",p:3.707,s:7.246},{g:"40-44",p:3.704,s:7.239},{g:"45-49",p:3.726,s:7.287},{g:"50+",p:3.776,s:7.343}],
+  ot:[{d:"IT",h:8.33,p:3.683},{d:"Store Ops",h:8.23,p:3.773},{d:"Finance",h:8.16,p:3.677},{d:"Cust.Svc",h:8.07,p:3.727},{d:"Fresh Prod.",h:7.94,p:3.671},{d:"HR",h:7.93,p:3.692},{d:"Marketing",h:7.88,p:3.668},{d:"Logistics",h:7.82,p:3.603},{d:"M/F Bakery",h:7.74,p:3.675}],
+  gap:[{n:"Katelyn Ross",g:5043},{n:"Kelly Pham",g:5024},{n:"Margaret Jones",g:5009},{n:"Travis Gonzalez",g:4969},{n:"Robert Sanchez",g:4986},{n:"Patricia Wright",g:4962},{n:"Thomas Clark",g:4974},{n:"Michael Davis",g:4974},{n:"Sarah Thompson",g:4911},{n:"Jennifer Lewis",g:4892}],
+  mgr:[{n:"N. Fitzgerald",s:3.802,t:138},{n:"M. Bishop",s:3.801,t:142},{n:"R. Quinn",s:3.794,t:136},{n:"B. Murray",s:3.789,t:134},{n:"J. Walton",s:3.786,t:133},{n:"E. Williams",s:3.785,t:137},{n:"M. Murray",s:3.780,t:137},{n:"D. James",s:3.779,t:137},{n:"A. Wright",s:3.776,t:132},{n:"W. Ward",s:3.774,t:134}],
+  tenure:[{b:"< 6 months",n:82},{b:"6-12 months",n:164},{b:"1-2 years",n:333},{b:"2-3 years",n:358},{b:"3+ years",n:554}],
+  cohort:[{y:"2012",r:86.6},{y:"2013",r:85.5},{y:"2014",r:80.2},{y:"2015",r:79.8},{y:"2016",r:77.8},{y:"2017",r:80.0},{y:"2018",r:79.3},{y:"2019",r:81.2},{y:"2020",r:80.4},{y:"2021",r:79.7}],
+  emptype:[{t:"Seasonal",a:56.5},{t:"Contractor",a:42.8},{t:"Part-time",a:23.0},{t:"Full-time",a:13.5}],
+  risk:[{n:"Mark Mooney",d:"Logistics",r:"Warehouse Worker",ab:3.29,sat:3.93,pf:2.73,sc:4.124},{n:"Mary Cummings",d:"Logistics",r:"Warehouse Worker",ab:3.14,sat:4.08,pf:2.77,sc:4.031},{n:"Steven White",d:"Logistics",r:"Warehouse Worker",ab:3.57,sat:4.33,pf:2.73,sc:4.02},{n:"Brian Brown",d:"IT",r:"IT Assistant",ab:3.29,sat:4.43,pf:2.77,sc:3.977},{n:"Joseph Reed",d:"Logistics",r:"Warehouse Worker",ab:3.43,sat:4.43,pf:2.8,sc:3.977},{n:"Jennifer Hernandez",d:"IT",r:"IT Assistant",ab:3.29,sat:4.5,pf:2.77,sc:3.949},{n:"Ronald Rivera",d:"Logistics",r:"Warehouse Worker",ab:3.57,sat:4.64,pf:2.73,sc:3.92},{n:"Scott White",d:"Logistics",r:"Warehouse Worker",ab:2.86,sat:4.29,pf:2.77,sc:3.906},{n:"Nathan Espinoza",d:"M/F Bakery",r:"Food Prep Worker",ab:2.71,sat:4.29,pf:2.77,sc:3.892},{n:"Carl Taylor",d:"Logistics",r:"Warehouse Worker",ab:3.0,sat:4.5,pf:2.87,sc:3.839},{n:"Carlos Carter",d:"Logistics",r:"Warehouse Worker",ab:2.71,sat:4.43,pf:2.87,sc:3.82},{n:"Ashley Young",d:"Fresh Produce",r:"Produce Clerk",ab:3.0,sat:4.57,pf:2.8,sc:3.816},{n:"Jennifer Walker",d:"Store Ops",r:"Stock Clerk",ab:2.86,sat:4.5,pf:2.87,sc:3.797},{n:"Jon Nelson",d:"IT",r:"IT Assistant",ab:2.71,sat:4.57,pf:2.87,sc:3.769},{n:"Rachel King",d:"Logistics",r:"Warehouse Worker",ab:2.57,sat:4.43,pf:2.87,sc:3.741}],
+  edu:[{e:"Master's",p:3.933,pr:0.255},{e:"Bachelor's",p:3.81,pr:0.195},{e:"PhD",p:3.773,pr:0.143},{e:"Some College",p:3.589,pr:0.052},{e:"High School",p:3.581,pr:0.082}],
+  promo:{yes:{p:4.247,s:7.925,prod:1.624,t:3.51},no:{p:3.701,s:7.237,prod:1.351,t:2.81}},
+  cand:[{n:"Anna Wheeler",d:"Store Ops",l:"Supervisor",sc:3.579},{n:"Jordan Pace",d:"Store Ops",l:"Entry",sc:3.566},{n:"Douglas Hampton",d:"Finance",l:"Entry",sc:3.554},{n:"Matthew Allen",d:"Store Ops",l:"Associate",sc:3.526},{n:"Glenn Chen",d:"Logistics",l:"Associate",sc:3.519},{n:"Susan Conley",d:"Store Ops",l:"Associate",sc:3.514},{n:"Debra Blackburn",d:"M/F Bakery",l:"Associate",sc:3.514},{n:"Thomas Hunt",d:"IT",l:"Entry",sc:3.512},{n:"Peggy Mendoza",d:"M/F Bakery",l:"Associate",sc:3.511},{n:"Richard Best",d:"Fresh Produce",l:"Associate",sc:3.51},{n:"Jeremy Davis",d:"Cust. Svc",l:"Entry",sc:3.508},{n:"Randy Robinson",d:"Store Ops",l:"Entry",sc:3.507},{n:"Brian Gross",d:"M/F Bakery",l:"Entry",sc:3.506},{n:"Brad Gordon",d:"Store Ops",l:"Associate",sc:3.498},{n:"Daniel Bush",d:"Store Ops",l:"Entry",sc:3.496}],
+  topS:[{n:"NY Superstore #81",r:24.33},{n:"NY Superstore #143",r:24.06},{n:"LA Superstore #51",r:24.0},{n:"Houston SS #30",r:23.99},{n:"NY Superstore #76",r:23.95}],
+  botS:[{n:"Philadelphia Exp",r:5.87},{n:"Columbus Exp",r:5.89},{n:"Dallas Express",r:5.91},{n:"Baltimore Exp",r:5.92},{n:"San Antonio Exp",r:5.92}],
+  otd:[{b:"< 85%",c:7.633,n:42.11},{b:"85-90%",c:7.529,n:41.3},{b:"90-95%",c:7.506,n:40.26},{b:"95-100%",c:7.485,n:39.64}],
+  waste:[{b:"< 1.5%",r:254341},{b:"1.5-2.5%",r:143463},{b:"2.5-3.5%",r:55865},{b:"3.5%+",r:57608}],
+  scat:[{nm:"NY Regular #67",t:"R",x:8.204,y:16.5},{nm:"San Jose #144",t:"R",x:8.037,y:14.9},{nm:"Austin #104",t:"R",x:7.904,y:15.3},{nm:"Jacksonville #19",t:"R",x:7.883,y:14.0},{nm:"Dallas #60",t:"R",x:7.875,y:14.6},{nm:"Philadelphia #146",t:"R",x:7.867,y:15.0},{nm:"SA Regular #82",t:"R",x:7.848,y:14.0},{nm:"Houston SS #30",t:"S",x:7.836,y:24.0},{nm:"Columbus #113",t:"R",x:7.818,y:14.4},{nm:"Phoenix #73",t:"R",x:7.816,y:14.8}]
+};
+
+let built={};
+function go(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(!built[id]){build(id);built[id]=true;}
+}
+
+function mk(id,type,labels,datasets,opts={}){
+  const el=document.getElementById(id);
+  if(!el){console.warn('Canvas not found:',id);return;}
+  return new Chart(el,{type,data:{labels,datasets},options:{...base(),...opts}});
+}
+
+function build(id){
+  if(id==='overview') bOverview();
+  else if(id==='people') bPeople();
+  else if(id==='performance') bPerf();
+  else if(id==='compensation') bComp();
+  else if(id==='talent') bTalent();
+  else if(id==='stores') bStores();
+}
+
+function bOverview(){
+  const sorted=[...D.depts.map((d,i)=>({d,a:D.att[i]}))].sort((a,b)=>a.a-b.a);
+  mk('ov_att','bar',sorted.map(x=>x.d),[{
+    data:sorted.map(x=>x.a),
+    backgroundColor:sorted.map(x=>x.a>=21?RD2:x.a>=20?GO2:NA2),
+    borderRadius:0,barThickness:16
+  }],{indexAxis:'y',scales:{x:{min:15,grid:{color:GR},ticks:{callback:v=>v+'%'}},y:{grid:{color:'transparent'},ticks:{font:{size:10}}}},plugins:{legend:{display:false},tooltip:tp({callbacks:{label:c=>` ${c.raw}% attrition`}})}});
+
+  mk('ov_trend','line',D.monthly.map(x=>x.m),[{
+    data:D.monthly.map(x=>x.r),
+    borderColor:NA,backgroundColor:'rgba(28,46,74,0.06)',
+    borderWidth:2,tension:0.35,fill:true,
+    pointRadius:4,pointBackgroundColor:NA,pointBorderColor:'#f5f1eb',pointBorderWidth:2
+  }],{scales:{x:{grid:{color:GR},ticks:{font:{size:9}}},y:{min:3.73,grid:{color:GR},ticks:{callback:v=>v.toFixed(2)}}}});
+
+  mk('ov_hc','doughnut',D.depts,[{
+    data:D.hc,
+    backgroundColor:[NA,'#2e4368','#3a5278',GO,RD,'#1a5c2a','#7a5e1a','#5c1a1a','#8a7878'],
+    borderColor:'#f5f1eb',borderWidth:2,hoverOffset:3
+  }],{plugins:{legend:{display:true,position:'right',labels:{font:{size:9},boxWidth:9,color:MU}}},scales:{}});
+
+  mk('ov_sal','bar',D.salLvl.map(x=>x.l),[{
+    data:D.salLvl.map(x=>x.s),
+    backgroundColor:D.salLvl.map((x,i)=>`rgba(184,150,62,${1-i*0.1})`),
+    borderRadius:0,barThickness:18
+  }],{scales:{x:{grid:{color:'transparent'},ticks:{font:{size:9}}},y:{grid:{color:GR},ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'k'}}},plugins:{legend:{display:false},tooltip:tp({callbacks:{label:c=>' $'+c.raw.toLocaleString()}})}});
+
+  const el=document.getElementById('ov_sat_list');
+  const maxS=Math.max(...D.sat),minS=Math.min(...D.sat);
+  D.sat.map((s,i)=>({s,d:D.depts[i]})).sort((a,b)=>b.s-a.s).forEach(({s,d})=>{
+    const pct=(s-7.0)/(maxS-7.0+0.01)*100;
+    const col=s===maxS?GN:s===minS?RD:NA;
+    el.innerHTML+=`<div style="margin-bottom:0.55rem"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:0.72rem;color:#2d2926">${d}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:${col};font-weight:500">${s}</span></div><div style="height:3px;background:#e4dfd6"><div style="height:100%;width:${pct}%;background:${col}"></div></div></div>`;
+  });
+}
+
+function bPeople(){
+  const sorted=[...D.depts.map((d,i)=>({d,a:D.att[i]}))].sort((a,b)=>a.a-b.a);
+  mk('p_att','bar',sorted.map(x=>x.d),[{
+    data:sorted.map(x=>x.a),
+    backgroundColor:sorted.map(x=>x.a>=21?RD2:x.a>=20?GO2:NA2),
+    borderRadius:0,barThickness:18
+  }],{indexAxis:'y',scales:{x:{min:15,grid:{color:GR},ticks:{callback:v=>v+'%'}},y:{grid:{color:'transparent'},ticks:{font:{size:10}}}},plugins:{legend:{display:false},tooltip:tp({callbacks:{label:c=>` ${c.raw}% attrition`}})}});
+
+  mk('p_ten','bar',D.tenure.map(x=>x.b),[{
+    data:D.tenure.map(x=>x.n),
+    backgroundColor:[NA2,NA4,GO2,GO4,RD2],
+    borderRadius:0,barThickness:28
+  }],{scales:{x:{grid:{color:'transparent'}},y:{grid:{color:GR}}},plugins:{legend:{display:false},tooltip:tp({callbacks:{label:c=>` ${c.raw} employees`}})}});
+
+  mk('p_coh','line',D.cohort.map(x=>x.y),[{
+    data:D.cohort.map(x=>x.r),
+    borderColor:NA,backgroundColor:'rgba(28,46,74,0.07)',
+    borderWidth:2,tension:0.3,fill:true,
+    pointRadius:3,pointBackgroundColor:NA,pointBorderColor:'#f5f1eb',pointBorderWidth:2
+  }],{scales:{x:{grid:{color:GR}},y:{min:75,grid:{color:GR},ticks:{callback:v=>v+'%'}}}});
+
+  mk('p_et','bar',D.emptype.map(x=>x.t),[{
+    data:D.emptype.map(x=>x.a),
+    backgroundColor:[RD2,GO2,NA2,NA4],
+    borderRadius:0,barThickness:28
+  }],{scales:{x:{grid:{color:'transparent'}},y:{grid:{color:GR},ticks:{callback:v=>v+'%'}}},plugins:{legend:{display:false},tooltip:tp({callbacks:{label:c=>` ${c.raw}% attrition`}})}});
+
+  const tbl=document.getElementById('p_risk');
+  D.risk.forEach((r,i)=>{
+    const cl=r.sc>=4?RD:r.sc>=3.85?GO:GN;
+    const pct=Math.min(100,(r.sc/5)*100);
+    const rnk=i===0?'g1':i===1?'g2':i===2?'g3':'';
+    tbl.innerHTML+=`<tr><td><span class="rn ${rnk}">${i+1}</span></td><td class="td-bold">${r.n}</td><td><span class="bdg bdg-navy" style="font-size:0.57rem">${r.d}</span></td><td style="color:${MU};font-size:0.72rem">${r.r}</td><td class="mono">${r.ab}</td><td class="mono" style="color:${RD}">${r.sat}</td><td class="mono" style="color:${RD}">${r.pf}</td><td><div class="mbar"><div class="mbar-bg"><div class="mbar-fill" style="width:${pct}%;background:${cl}"></div></div><span class="mono" style="color:${cl}">${r.sc}</span></div></td></tr>`;
+  });
+}
+
+function bPerf(){
+  mk('pf_mo','line',D.monthly.map(x=>x.m),[{
+    data:D.monthly.map(x=>x.r),
+    borderColor:GN,backgroundColor:'rgba(45,138,68,0.07)',
+    borderWidth:2,tension:0.35,fill:true,
+    pointRadius:4,pointBackgroundColor:GN,pointBorderColor:'#f5f1eb',pointBorderWidth:2
+  }],{scales:{x:{grid:{color:GR},ticks:{font:{size:9}}},y:{min:3.73,grid:{color:GR},ticks:{callback:v=>v.toFixed(3)}}}});
+
+  mk('pf_tr','bar',D.training.map(x=>x.b),[
+    {label:'Performance',data:D.training.map(x=>x.p),backgroundColor:D.training.map((x,i)=>i===1?NA:NA4),borderRadius:0,barThickness:14,yAxisID:'y'},
+    {label:'Satisfaction',data:D.training.map(x=>x.s),backgroundColor:D.training.map((x,i)=>i===1?GO:GO4),borderRadius:0,barThickness:14,yAxisID:'y2'}
+  ],{plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:10,color:MU}},tooltip:tp()},scales:{x:{grid:{color:'transparent'}},y:{min:3.6,grid:{color:GR},ticks:{callback:v=>v.toFixed(2)}},y2:{position:'right',min:7.0,grid:{drawOnChartArea:false},ticks:{callback:v=>v.toFixed(2)}}}});
+
+  mk('pf_ab','line',D.absent.map(x=>x.b),[{
+    data:D.absent.map(x=>x.p),
+    borderColor:RD,backgroundColor:'rgba(155,35,53,0.07)',
+    borderWidth:2.5,tension:0.2,fill:true,
+    pointRadius:5,pointBackgroundColor:RD,pointBorderColor:'#f5f1eb',pointBorderWidth:2
+  }],{scales:{x:{grid:{color:GR}},y:{min:3.2,grid:{color:GR},ticks:{callback:v=>v.toFixed(2)}}}});
+
+  mk('pf_ag','bar',D.age.map(x=>x.g),[
+    {label:'Performance',data:D.age.map(x=>x.p),backgroundColor:NA2,borderRadius:0,barThickness:14,yAxisID:'y'},
+    {label:'Satisfaction',data:D.age.map(x=>x.s),backgroundColor:GO2,borderRadius:0,barThickness:14,yAxisID:'y2'}
+  ],{plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:10,color:MU}},tooltip:tp()},scales:{x:{grid:{color:'transparent'},ticks:{font:{size:9.5}}},y:{min:3.67,grid:{color:GR},ticks:{callback:v=>v.toFixed(2)}},y2:{position:'right',min:7.2,grid:{drawOnChartArea:false},ticks:{callback:v=>v.toFixed(2)}}}});
+}
+
+function bComp(){
+  mk('c_sl','bar',D.salLvl.map(x=>x.l),[{
+    data:D.salLvl.map(x=>x.s),
+    backgroundColor:D.salLvl.map((x,i)=>`rgba(184,150,62,${1-i*0.1})`),
+    borderRadius:0,barThickness:22
+  }],{scales:{x:{grid:{color:'transparent'},ticks:{font:{size:9.5}}},y:{grid:{color:GR},ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'k'}}},plugins:{legend:{display:false},tooltip:tp({callbacks:{label:c=>' $'+c.raw.toLocaleString()}})}});
+
+  mk('c_sd','bar',D.salDept.map(x=>x.d),[{
+    data:D.salDept.map(x=>x.s),
+    backgroundColor:NA2,
+    borderRadius:0,barThickness:18
+  }],{scales:{x:{grid:{color:'transparent'},ticks:{font:{size:9},maxRotation:25}},y:{min:25000,grid:{color:GR},ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'k'}}},plugins:{legend:{display:false},tooltip:tp({callbacks:{label:c=>' $'+c.raw.toLocaleString()}})}});
+
+  mk('c_ot','bar',D.ot.map(x=>x.d),[
+    {label:'Overtime hrs',data:D.ot.map(x=>x.h),backgroundColor:NA2,borderRadius:0,barThickness:14,yAxisID:'y'},
+    {label:'Avg Performance',data:D.ot.map(x=>x.p),type:'line',borderColor:GO,backgroundColor:'transparent',borderWidth:2,pointRadius:4,pointBackgroundColor:GO,yAxisID:'y2'}
+  ],{plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:10,color:MU}},tooltip:tp()},scales:{x:{grid:{color:'transparent'},ticks:{font:{size:9}}},y:{grid:{color:GR},ticks:{callback:v=>v+'h'}},y2:{position:'right',min:3.55,grid:{drawOnChartArea:false},ticks:{callback:v=>v.toFixed(2)}}}});
+
+  mk('c_gp','bar',D.gap.map(x=>x.n),[{
+    data:D.gap.map(x=>x.g),
+    backgroundColor:RD2,
+    borderRadius:0,barThickness:12
+  }],{indexAxis:'y',scales:{x:{grid:{color:GR},ticks:{callback:v=>'$'+v.toLocaleString()}},y:{grid:{color:'transparent'},ticks:{font:{size:9.5}}}},plugins:{legend:{display:false},tooltip:tp({callbacks:{label:c=>' Deficit: -$'+c.raw.toLocaleString()}})}});
+}
+
+function bTalent(){
+  mk('t_mgr','bar',D.mgr.map(x=>x.n),[{
+    data:D.mgr.map(x=>x.s),
+    backgroundColor:D.mgr.map((x,i)=>i===0?GO:NA2),
+    borderRadius:0,barThickness:16
+  }],{indexAxis:'y',scales:{x:{min:3.77,grid:{color:GR},ticks:{callback:v=>v.toFixed(3)}},y:{grid:{color:'transparent'},ticks:{font:{size:9.5}}}},plugins:{legend:{display:false},tooltip:tp({callbacks:{afterLabel:ctx=>`Team: ${D.mgr[ctx.dataIndex].t} employees`}})}});
+
+  const pm=D.promo;
+  new Chart(document.getElementById('t_radar'),{type:'radar',data:{labels:['Performance','Satisfaction','Productivity','Training hrs'],datasets:[
+    {label:'Promoted',data:[pm.yes.p,pm.yes.s/2,pm.yes.prod*2,pm.yes.t],borderColor:GN,backgroundColor:'rgba(45,138,68,0.1)',borderWidth:2,pointRadius:4,pointBackgroundColor:GN},
+    {label:'Not Promoted',data:[pm.no.p,pm.no.s/2,pm.no.prod*2,pm.no.t],borderColor:MU,backgroundColor:'rgba(138,130,120,0.08)',borderWidth:1.5,pointRadius:3,pointBackgroundColor:MU}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:9,color:MU}},tooltip:{backgroundColor:'#fff',borderColor:'#c8c2b8',borderWidth:1,titleColor:'#1a1714',bodyColor:'#4a4540'}},scales:{r:{grid:{color:GR},ticks:{backdropColor:'transparent',font:{size:9}},pointLabels:{font:{size:10,family:"'IBM Plex Sans'"}}}}}});
+
+  mk('t_edu','bar',D.edu.map(x=>x.e),[
+    {label:'Avg Performance',data:D.edu.map(x=>x.p),backgroundColor:D.edu.map((x,i)=>i===0?NA:NA4),borderRadius:0,barThickness:14,yAxisID:'y'},
+    {label:'Promo Rate %',data:D.edu.map(x=>x.pr),backgroundColor:D.edu.map((x,i)=>i===0?GO:GO4),borderRadius:0,barThickness:14,yAxisID:'y2'}
+  ],{plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:10,color:MU}},tooltip:tp()},scales:{x:{grid:{color:'transparent'},ticks:{font:{size:9.5}}},y:{min:3.4,grid:{color:GR},ticks:{callback:v=>v.toFixed(2)}},y2:{position:'right',grid:{drawOnChartArea:false},ticks:{callback:v=>v+'%'}}}});
+
+  const tbl=document.getElementById('t_cand');
+  D.cand.forEach((x,i)=>{
+    const rnk=i===0?'g1':i===1?'g2':i===2?'g3':'';
+    const pct=Math.round((x.sc/4)*100);
+    tbl.innerHTML+=`<tr><td><span class="rn ${rnk}">${i+1}</span></td><td class="td-bold" style="font-size:0.78rem">${x.n}</td><td><span class="bdg bdg-navy" style="font-size:0.57rem">${x.d}</span></td><td><span class="bdg bdg-gold" style="font-size:0.57rem">${x.l}</span></td><td><div class="mbar"><div class="mbar-bg"><div class="mbar-fill" style="width:${pct}%;background:${NA}"></div></div><span class="mono" style="color:${NA}">${x.sc}</span></div></td></tr>`;
+  });
+}
+
+function bStores(){
+  const revL=[...D.topS.map(x=>x.n),...D.botS.map(x=>x.n)];
+  const revDat=[...D.topS.map(x=>x.r),...D.botS.map(x=>x.r)];
+  mk('s_rev','bar',revL,[{
+    data:revDat,
+    backgroundColor:[...Array(5).fill(GN2),...Array(5).fill(RD2)],
+    borderRadius:0,barThickness:22
+  }],{scales:{x:{grid:{color:'transparent'},ticks:{font:{size:8.5},maxRotation:20}},y:{grid:{color:GR},ticks:{callback:v=>'$'+v+'M'}}},plugins:{legend:{display:false},tooltip:tp({callbacks:{label:c=>' $'+c.raw.toFixed(1)+'M'}})}});
+
+  mk('s_otd','bar',D.otd.map(x=>x.b),[
+    {label:'CSAT',data:D.otd.map(x=>x.c),backgroundColor:D.otd.map((x,i)=>i===0?NA:NA4),borderRadius:0,barThickness:20,yAxisID:'y'},
+    {label:'NPS Score',data:D.otd.map(x=>x.n),type:'line',borderColor:GO,backgroundColor:'transparent',borderWidth:2,pointRadius:5,pointBackgroundColor:GO,yAxisID:'y2'}
+  ],{plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:10,color:MU}},tooltip:tp()},scales:{x:{grid:{color:'transparent'}},y:{min:7.47,grid:{color:GR},ticks:{callback:v=>v.toFixed(3)}},y2:{position:'right',min:39,grid:{drawOnChartArea:false},ticks:{callback:v=>v.toFixed(1)}}}});
+
+  mk('s_wst','bar',D.waste.map(x=>x.b),[{
+    data:D.waste.map(x=>x.r),
+    backgroundColor:[GN2,NA2,GO2,RD2],
+    borderRadius:0,barThickness:32
+  }],{scales:{x:{grid:{color:'transparent'}},y:{grid:{color:GR},ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'k'}}},plugins:{legend:{display:false},tooltip:tp({callbacks:{label:c=>' Avg $'+c.raw.toLocaleString()+' / store-month'}})}});
+
+  new Chart(document.getElementById('s_sct'),{type:'scatter',data:{datasets:[
+    {label:'Regular',data:D.scat.filter(x=>x.t==='R').map(x=>({x:x.x,y:x.y,nm:x.nm})),backgroundColor:'rgba(28,46,74,0.75)',pointRadius:7,pointHoverRadius:9},
+    {label:'Superstore',data:D.scat.filter(x=>x.t==='S').map(x=>({x:x.x,y:x.y,nm:x.nm})),backgroundColor:'rgba(184,150,62,0.85)',pointRadius:9,pointHoverRadius:11}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',borderColor:'#c8c2b8',borderWidth:1,titleColor:'#1a1714',bodyColor:'#4a4540',callbacks:{label:c=>[` ${c.raw.nm}`,` Satisfaction: ${c.raw.x}`,` Revenue: $${c.raw.y.toFixed(1)}M`]}}},scales:{x:{grid:{color:GR},title:{display:true,text:'Employee Satisfaction',color:MU,font:{size:10}}},y:{grid:{color:GR},ticks:{callback:v=>'$'+v+'M'},title:{display:true,text:'Revenue',color:MU,font:{size:10}}}}}});
+}
+
+bOverview(); built['overview']=true;
+</script>
+</body>
+</html>
