@@ -191,35 +191,6 @@ Open `dashboard/hr_analytics_unified.html` in any browser — no server or insta
 
 ---
 
-## 📝 MSSQL Syntax Notes
-
-All queries are written for **Microsoft SQL Server**. Key differences from MySQL / SQLite:
-
-| Pattern | MSSQL Syntax Used |
-|---|---|
-| Limit rows | `SELECT TOP N ...` instead of `LIMIT N` |
-| Safe date conversion | `TRY_CONVERT(DATE, col, 103)` — returns NULL on failure instead of crashing |
-| Date arithmetic | `DATEDIFF(MONTH, date1, date2)` |
-| Alias in GROUP BY | ❌ Not allowed — CASE expression must be repeated in full |
-| Alias in HAVING | ❌ Not allowed — aggregate expression must be repeated in full |
-
----
-
-## 📸 Dashboard Preview
-
-> *(Add screenshots here)*
-
-| Page | Preview |
-|---|---|
-| Overview | `screenshots/01_overview.png` |
-| People & Retention | `screenshots/02_people_retention.png` |
-| Performance | `screenshots/03_performance.png` |
-| Compensation | `screenshots/04_compensation.png` |
-| Talent Management | `screenshots/05_talent.png` |
-| Store Operations | `screenshots/06_store_operations.png` |
-
----
-
 ## 👤 Author
 
 **Vo Quang Khai**
