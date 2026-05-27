@@ -16,10 +16,10 @@ The project is built on **5 related tables:**
 
 | Table | File | Description |
 |---|---|---|
-| `dbo.Stores` | `stores.sql` | 150 retail stores — name, city, type, opening date |
+| `dbo.Stores` | `stores.sql` | 150 retail stores — name, city, store type, opening date |
 | `dbo.EmployeePerformance` | `employee_performance.sql` | Employee profiles — age, education, salary, job level, manager |
 | `dbo.MonthlyPerformance` | `monthly_performance.sql` | Monthly records — rating, training hours, overtime, bonus, satisfaction |
-| `dbo.RoleKPIs` | `role_kpis.sql` + `role_kpis_02.sql` | Role-specific KPIs + Productivity Index (split into 2 files due to size) |
+| `dbo.RoleKPIs` | `role_kpis.sql` + `role_kpis_data_02.sql` | Role-specific KPIs + Productivity Index (split into 2 files due to size) |
 | `dbo.BusinessOutcomes` | `business_outcomes.sql` | Store-level revenue, CSAT, NPS, waste %, on-time delivery |
 
 **Relationships:**
@@ -33,59 +33,111 @@ dbo.Stores ──────────────────── dbo.Empl
 
 ---
 
-## 📊 Analyses — 22 Questions Answered
+## 📊 Dashboard Pages
 
-### Part 1 — Core Analysis
+### Page 1 — Overview
+**Purpose:** High-level snapshot of workforce health across all departments and locations.
 
-| # | Question | Key Finding |
-|---|----------|-------------|
-| Q1 | Attrition rate by department | **19.9%** overall — Logistics & HR highest at **22.2%** |
-| Q2 | Average salary by job level & department | Executive **$111K** → Entry **$23K** (4.8× gap) |
-| Q3 | Top months by performance rating | **Nov–Dec** and **Jan** consistently peak |
-| Q4 | Top 10 managers by team performance | Nicholas Fitzgerald leads (avg team score 3.802) |
-| Q5 | Does more training = higher performance? | **5–9h/month** is the optimal range (perf 3.939) |
-| Q6 | Top 5 vs bottom 5 stores by revenue | NY Superstore #81: **$24.3M** vs Express stores ~$5.9M |
-| Q7 | Employee satisfaction by department | Store Operations happiest (7.323/10) |
-| Q8 | Productivity index by job role | Fresh Foods Director leads (1.559) |
-| Q9 | Promotion candidates | Top 15 by weighted score (Perf×0.4 + Prod×0.5 + Sat×0.1) |
-| Q10 | Age vs performance | Weak correlation — age does not determine performance |
+**KPI Cards:**
+- Total Employees · Attrition Rate · Avg Performance · Avg Satisfaction
 
-### Part 2 — Extended Analysis
+**Charts:**
+- 📊 Attrition rate by department (horizontal bar)
+- 📈 Monthly performance trend — top 12 periods
+- 🍩 Headcount distribution by department (donut)
+- 💰 Average salary by job level (bar)
+- 📋 Satisfaction score ranking by department (inline bars)
 
-| # | Analysis | Key Finding |
-|---|----------|-------------|
-| A1 | Tenure at exit | **37%** of leavers had 3+ years tenure — "late attrition" risk |
-| A2 | Flight risk scoring | Logistics & IT have highest concentration of at-risk employees |
-| A3 | Underpaid high performers | 15 employees with perf ≥ 4.2 earn below their level average |
-| A4 | Overtime by department | IT works most overtime (8.33h) but has lowest performance |
-| A5 | Cohort retention by hire year | 2012–2013 cohort retains **86%** — most loyal group |
-| A6 | On-time delivery vs CSAT | Unexpected: lower OTD → higher CSAT (human service effect) |
-| A7 | Absenteeism impact | Linear decline — red threshold at **4–5 absent days/month** |
-| A8 | Promotion fairness | Promoted group outperforms by **+14.5% perf, +20.2% productivity** |
-| A9 | Education vs performance | Master's leads; PhD unexpectedly ranks 3rd |
-| A10 | Employment type comparison | Seasonal attrition **56.5%** vs Full-time **13.5%** |
-| A11 | Employee satisfaction → store revenue | Positive correlation between staff satisfaction and revenue |
-| A12 | Waste % → revenue impact | Waste < 1.5% stores earn **4.5× more** than high-waste stores |
+---
+
+### Page 2 — People & Retention
+**Purpose:** Deep dive into attrition patterns, tenure analysis, cohort retention, and flight risk identification.
+
+**KPI Cards:**
+- Total Exits · Late Attrition % · Best Cohort Retention · Flight Risk Flagged
+
+**Charts:**
+- 📊 Attrition rate by department
+- ⏳ Exit volume by tenure length at departure — when do employees actually leave?
+- 📈 Cohort retention rate by hire year (2012–2021)
+- 📊 Attrition rate by employment type (Full-time vs Part-time vs Contractor vs Seasonal)
+- 🚨 Flight risk table — top 15 at-risk active employees with composite score
+
+---
+
+### Page 3 — Performance
+**Purpose:** Analysis of performance drivers — seasonality, training effectiveness, absenteeism impact, and age.
+
+**KPI Cards:**
+- Peak Month Rating · Optimal Training Range · Absenteeism Alert Threshold · Age vs Perf Gap
+
+**Charts:**
+- 📈 Monthly performance trend — top 12 periods
+- 📊 Training hours vs performance & satisfaction (grouped bar + dual axis)
+- 📉 Absenteeism impact on performance rating (line chart)
+- 📊 Performance & satisfaction by age group (grouped bar)
+
+---
+
+### Page 4 — Compensation
+**Purpose:** Salary benchmarking across levels and departments, overtime cost analysis, and identification of underpaid high performers.
+
+**KPI Cards:**
+- Executive Avg Salary · Entry Avg Salary · Pay Gap Ratio · Underpaid High Performers
+
+**Charts:**
+- 📊 Average salary by job level
+- 📊 Average salary by department
+- 📊 Overtime hours by department with performance overlay (bar + line)
+- 📊 Salary deficit — top 10 underpaid high performers (perf ≥ 4.2, below level average)
+
+---
+
+### Page 5 — Talent Management
+**Purpose:** Manager effectiveness ranking, promotion fairness validation, education ROI analysis, and promotion pipeline.
+
+**KPI Cards:**
+- Top Manager Score · Promotion Performance Uplift · Education Leader · Top Promotion Candidate
+
+**Charts:**
+- 📊 Top 10 managers ranked by team performance (horizontal bar)
+- 🕸️ Promoted vs Not Promoted — 4-dimension radar chart
+- 📊 Education level vs performance and promotion rate (grouped bar + dual axis)
+- 📋 Top 15 promotion candidates table — weighted composite score
+
+---
+
+### Page 6 — Store Operations
+**Purpose:** Revenue benchmarking across store formats, customer satisfaction drivers, waste efficiency, and employee satisfaction correlation.
+
+**KPI Cards:**
+- Top Store Revenue · Bottom Store Revenue · Avg Customer Satisfaction · Low vs High Waste Revenue Ratio
+
+**Charts:**
+- 📊 Top 5 vs Bottom 5 stores by total revenue (2022–2024)
+- 📊 On-time delivery vs CSAT — counterintuitive relationship
+- 📊 Waste percentage → average monthly revenue per store
+- 🔵 Scatter plot — employee satisfaction vs store revenue (Regular vs Superstore)
 
 ---
 
 ## 🛠️ Tools & Techniques
 
-- **Microsoft SQL Server** — all data storage and analysis
+- **Microsoft SQL Server** — all data storage, transformation, and analysis
 - **T-SQL** — CTEs, CASE WHEN bucketing, window aggregations, weighted scoring models
 - **TRY_CONVERT / DATEDIFF** — safe date parsing and tenure calculation
-- **HTML / CSS / JavaScript + Chart.js** — interactive single-file dashboard
-- **Sidebar navigation** — 22 analyses accessible from a fixed left panel
+- **HTML / CSS / JavaScript + Chart.js** — custom single-file interactive dashboard
+- **Editorial design system** — IBM Plex fonts, cream/navy/gold palette, zero border-radius aesthetic
 
 ---
 
 ## 💡 Key Insights
 
-1. **Training sweet spot at 5–9h/month** — employees in this range achieve the highest performance (3.939) and satisfaction (7.529). Training beyond 15h shows no added benefit.
-2. **Late attrition is the real risk** — 37% of departures happen after 3+ years, not in the first few months. Retention programs should target the 12–36 month window.
+1. **Training sweet spot at 5–9h/month** — employees in this range achieve the highest performance (3.939) and satisfaction (7.529). Training beyond 15h shows diminishing returns.
+2. **Late attrition is the real risk** — 37% of departures happen after 3+ years, not during onboarding. Retention programs should target the 12–36 month window.
 3. **Salary-performance mismatch** — 15 high performers are paid below their job level average, making them prime targets for competitor poaching.
-4. **Promotion system is fair** — promoted employees outperform non-promoted peers by 14.5% on performance and 20.2% on productivity, confirming the evaluation process works.
-5. **Store type drives revenue more than service quality** — the $18M gap between Superstore and Express stores is explained by store format and location, not CSAT or NPS scores.
+4. **Promotion system is fair** — promoted employees outperform non-promoted peers by +14.5% on performance and +20.2% on productivity, confirming the evaluation process works correctly.
+5. **Store type drives revenue more than service quality** — the $18M gap between Superstore and Express locations is explained by format and city size, not CSAT or NPS scores.
 
 ---
 
@@ -98,13 +150,13 @@ hr-analytics/
 ├── employee_performance.sql       ← DDL + INSERT data (7,500 employees)
 ├── monthly_performance.sql        ← DDL + INSERT data (236,591 records)
 ├── role_kpis.sql                  ← DDL + INSERT rows 1 – 100,000
-├── role_kpis_02.sql               ← INSERT rows 100,001 – 236,591 (split due to size)
+├── role_kpis_data_02.sql          ← INSERT rows 100,001 – 236,591 (split due to size)
 ├── business_outcomes.sql          ← DDL + INSERT data (16,200 records)
 │
 ├── Querry_Human_Resources.sql     ← All 22 analysis queries
 │
 └── dashboard/
-    └── hr_analytics_unified.html  ← Interactive dashboard (all 22 analyses)
+    └── hr_analytics_unified.html  ← Interactive dashboard (6 thematic pages)
 ```
 
 ---
@@ -113,29 +165,58 @@ hr-analytics/
 
 **Step 1 — Create the database and tables**
 
-Run the SQL files in this exact order (foreign key dependencies):
+Run SQL files in this exact order to respect foreign key dependencies:
 
 ```sql
 -- 1. stores.sql                 (create table + insert 150 stores)
--- 2. employee_performance.sql   (create table + insert employees)
--- 3. monthly_performance.sql    (create table + insert monthly records)
+-- 2. employee_performance.sql   (create table + insert 7,500 employees)
+-- 3. monthly_performance.sql    (create table + insert 236,591 records)
 -- 4. role_kpis.sql              (create table + insert rows 1 – 100,000)
--- 5. role_kpis_02.sql           (insert rows 100,001 – 236,591)
--- 6. business_outcomes.sql      (create table + insert store outcomes)
+-- 5. role_kpis_data_02.sql      (insert rows 100,001 – 236,591)
+-- 6. business_outcomes.sql      (create table + insert 16,200 records)
 ```
 
 **Step 2 — Run the analyses**
 
 ```sql
--- Open and run: Querry_Human_Resources.sql
--- All 22 queries are separated by comments for easy navigation
+-- Open and execute: Querry_Human_Resources.sql
+-- 22 queries separated by comments for easy navigation
 ```
 
 **Step 3 — View the dashboard**
 
-Open `dashboard/hr_analytics_unified.html` in any browser — no server required.
+Open `dashboard/hr_analytics_unified.html` in any browser — no server or installation required.
 
-> **Note:** The dashboard is fully self-contained (all data embedded as JavaScript). No database connection needed for viewing.
+> **Note:** The dashboard is fully self-contained. All chart data is embedded as JavaScript — no live database connection needed for viewing.
+
+---
+
+## 📝 MSSQL Syntax Notes
+
+All queries are written for **Microsoft SQL Server**. Key differences from MySQL / SQLite:
+
+| Pattern | MSSQL Syntax Used |
+|---|---|
+| Limit rows | `SELECT TOP N ...` instead of `LIMIT N` |
+| Safe date conversion | `TRY_CONVERT(DATE, col, 103)` — returns NULL on failure instead of crashing |
+| Date arithmetic | `DATEDIFF(MONTH, date1, date2)` |
+| Alias in GROUP BY | ❌ Not allowed — CASE expression must be repeated in full |
+| Alias in HAVING | ❌ Not allowed — aggregate expression must be repeated in full |
+
+---
+
+## 📸 Dashboard Preview
+
+> *(Add screenshots here)*
+
+| Page | Preview |
+|---|---|
+| Overview | `screenshots/01_overview.png` |
+| People & Retention | `screenshots/02_people_retention.png` |
+| Performance | `screenshots/03_performance.png` |
+| Compensation | `screenshots/04_compensation.png` |
+| Talent Management | `screenshots/05_talent.png` |
+| Store Operations | `screenshots/06_store_operations.png` |
 
 ---
 
